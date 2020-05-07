@@ -77,8 +77,8 @@ server.delete('/api/users/:id', function(req, res) {
 })
 
 server.put("/api/users/:id", (req, res) => {
-    const id = Number(req.params.id);
-    const getUser = users.filter((user) => user.id === id);
+    const id = req.params.id;
+    const getUser = users.filter((user) => user.id == id);
     let newList;
 
     if (getUser.length <= 0) {
@@ -88,7 +88,7 @@ server.put("/api/users/:id", (req, res) => {
         res.status(400).send("Please provide name and bio for the user.");
     } else {
         newList = users.filter((user) => user.id !== id);
-        if (req.body.id === id){
+        if (req.body.id == id){
             newList.push(req.body);
             res.status(200).send(newList);
         } else{
@@ -104,4 +104,27 @@ server.put("/api/users/:id", (req, res) => {
     });
 
 
-server.listen(4000, () => console.log('\n==API RUNNING==\n')); 
+    server.patch('/api/users/:id', (req, res) => {
+        const id = req.params.id
+        const userById = users.find(user => user.id == id)
+        const userInfo = req.body
+        const {name, bio} = userInfo
+        // let newUsers
+        if(res){
+            if (!userById){
+                res.status(404).json({ message: "The user with the specified ID does not exist." })
+            } else if (!name || !bio) {
+                res.status(400).json({ errorMessage: "Please provide name and bio for the user." })
+            } else {
+                userById.name = name
+                userById.bio = bio
+                res.status(200).json({message: 'User Added'})
+            }
+        } else {
+            res.status(500).json({ errorMessage: "The user information could not be modified." })
+        }
+    })
+
+
+const port = process.env.PORT || 5000;
+server.listen(port, () => console.log('\n==API RUNNING==\n')); 
